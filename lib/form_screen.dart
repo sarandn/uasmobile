@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'api_manager.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:provider/provider.dart';
-// import 'draw:io';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
 class NoteFormPage extends StatefulWidget {
   @override
@@ -10,89 +14,46 @@ class NoteFormPage extends StatefulWidget {
 }
 
 class _NoteFormPageState extends State<NoteFormPage> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
-  final TextEditingController _fileController = TextEditingController();
+  final TextEditingController _judulController = TextEditingController();
+  final TextEditingController _isiController = TextEditingController();
+
+  Future<void> _addNote() async {
+    final apiManager = Provider.of<ApiManager>(context, listen: false);
+
+    final judul = _judulController.text;
+    final isi = _isiController.text;
+
+    dynamic result = await apiManager.addNoteDetail(judul, isi);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New Note'),
+        title: Text('Tambah Catatan'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
+        child: Column(
           children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: 'Title',
-              ),
+            TextField(
+              controller: _judulController,
+              decoration: InputDecoration(labelText: 'Judul'),
             ),
-            SizedBox(height: 16.0),
-            TextFormField(
-              controller: _contentController,
-              maxLines: 5,
-              decoration: InputDecoration(
-                labelText: 'Content',
-              ),
+            TextField(
+              controller: _isiController,
+              decoration: InputDecoration(labelText: 'Isi'),
             ),
-            SizedBox(height: 16.0),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _fileController,
-                    decoration: InputDecoration(
-                      labelText: 'Choose File',
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.0),
-                ElevatedButton(
-                  onPressed: () {
-                    // Implement logic to choose a file
-                    chooseFile();
-                  },
-                  child: Text('Browse'),
-                ),
-              ],
-            ),
-            SizedBox(height: 32.0),
+            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                // Implement logic to save the note
-                saveNote();
-              },
-              child: Text('Save'),
+              onPressed: _addNote,
+              child: Text('Submit'),
             ),
           ],
         ),
       ),
     );
-  }
-
-  void saveNote() {
-    // Retrieve the entered values
-    final String title = _titleController.text;
-    final String content = _contentController.text;
-    final String selectedFile = _fileController.text;
-
-    // Perform the logic to save the note (you can save to a database, file, etc.)
-    // For now, let's just print the values
-    print('Title: $title');
-    print('Content: $content');
-    print('Selected File: $selectedFile');
-
-    // Optionally, you can navigate back to the previous screen or perform other actions
-    Navigator.pop(context);
-  }
-
-  void chooseFile() {
-    // Implement logic to choose a file (you can use plugins like file_picker)
-    // For now, let's just print a message
-    print('Choosing a file...');
   }
 }

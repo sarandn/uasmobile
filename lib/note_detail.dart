@@ -4,7 +4,6 @@ import 'package:uasnote/dashboard.dart';
 class NoteDetailPage extends StatelessWidget {
   final Note note;
 
-
   NoteDetailPage({required this.note});
 
   @override
@@ -19,17 +18,17 @@ class NoteDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Title: ${note.title}',
+              'Title: ${note.judul}',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
-              'Date: ${note.date}',
+              'Date: ${note.created_at}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10),
             Text(
-              'Content: ${note.content}',
+              'Content: ${note.isi}',
               style: TextStyle(fontSize: 16),
             ),
           ],

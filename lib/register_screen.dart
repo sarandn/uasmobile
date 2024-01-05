@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // Import the login_screen.dart file
-
+import 'package:provider/provider.dart';
+import 'login_screen.dart';
+import 'api_manager.dart';
 
 class RegisterScreen extends StatelessWidget {
   // Controllers for full name, email, and password text fields
@@ -8,13 +9,12 @@ class RegisterScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Register'),
-        backgroundColor: Colors.orange, // Set app bar background color
+        backgroundColor: Colors.brown, // Set app bar background color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -24,7 +24,7 @@ class RegisterScreen extends StatelessWidget {
             children: <Widget>[
               // Logo above the registration form
               Image.asset(
-                'logoku.jpg', // Replace with the path to your logo image
+                'logo1.', // Replace with the path to your logo image
                 height: 80, // Adjust the height as needed
               ),
               SizedBox(height: 16), // Add some spacing
@@ -60,23 +60,39 @@ class RegisterScreen extends StatelessWidget {
 
               // "Register" button
               ElevatedButton(
-                onPressed: () {
-                  // Perform registration logic here
-                  // Access the entered values using fullNameController.text, emailController.text, and passwordController.text
-                  // If registration is successful, navigate to the login screen
+                onPressed: () async {
+                  try {
+                    final name = fullNameController.text;
+                    final username = emailController.text;
+                    final password = passwordController.text;
+                    final apiManager =
+                        Provider.of<ApiManager>(context, listen: false);
+                    await apiManager.register(name, username, password);
+                    // Show a toast on successful registration
+
+                    Navigator.pushReplacementNamed(context, '/login');
+                    // Handle successful registration
+                  } catch (e) {
+                    print('Registration failed. Error: $e');
+                    // Handle registration failure
+                  }
+
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.orange, // Set button background color
+                  primary: Colors.white, // Set button background color
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     'Register',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.brown,),
+                    
                   ),
                 ),
               ),
