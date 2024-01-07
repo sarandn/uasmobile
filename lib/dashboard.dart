@@ -12,6 +12,8 @@ class DashboardPage extends StatefulWidget {
   _DashboardPageState createState() => _DashboardPageState();
 }
 
+// ... (kode sebelumnya)
+
 class _DashboardPageState extends State<DashboardPage> {
   List<Note> notes = [];
 
@@ -35,20 +37,41 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  Future<void> _deleteNote(int id) async {
+  
+
+  Future<void> _deleteNote(String id) async {
     final apiManager = Provider.of<ApiManager>(context, listen: false);
 
     try {
-      await apiManager.deleteNoteDetail(id);
+      await apiManager.deleteNote(id);
       // Reload notes after successful deletion
       await _fetchNotes();
     } catch (e) {
       // Handle error (e.g., show an error message)
       print('Error deleting note: $e');
+
+      // Tambahkan logika penanganan kesalahan di sini, misalnya menampilkan AlertDialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Failed to delete note. Error: $e'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
-  Future<void> _showDeleteConfirmationDialog(int noteId) async {
+  Future<void> _showDeleteConfirmationDialog(String noteId) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -141,11 +164,76 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     IconButton(
                       icon: Icon(Icons.delete),
-                      color: Colors.red,
-                      onPressed: () {
-                        _showDeleteConfirmationDialog(note.isi as int);
-                        // Add logic for deleting the note
-                        // You can use 'note' to identify and delete the corresponding note
+                      onPressed: () async {
+                        // Tampilkan dialog konfirmasi
+                        bool deleteConfirmed = await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Konfirmasi Hapus'),
+                              content: Text(
+                                  'Apakah Anda yakin ingin menghapus data dengan ID ${note.id}?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .pop(false); // Batal menghapus
+                                  },
+                                  child: Text('Batal'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .pop(true); // Konfirmasi menghapus
+                                  },
+                                  child: Text('Hapus'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        // Jika konfirmasi untuk menghapus diberikan
+                        if (deleteConfirmed == true) {
+                          try {
+                            await _deleteNote(note.id
+                                .toString()); // Pastikan ID dikonversi menjadi String
+                            print('Delete Note: ${note.judul}');
+
+                            // Menampilkan notifikasi bahwa Catatan berhasil dihapus
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Catatan berhasil dihapus!'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+
+                            // Menjalankan fungsi untuk me-reload catatan setelah dihapus
+                            await _fetchNotes();
+                          } catch (e) {
+                            // Handle error (e.g., show an error message)
+                            print('Error deleting note: $e');
+                            // Tambahkan logika penanganan kesalahan di sini, misalnya menampilkan AlertDialog
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Error'),
+                                  content: Text(
+                                      'Failed to delete note. Please try again.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text('OK'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        }
                       },
                     ),
                     IconButton(
@@ -193,20 +281,22 @@ class _DashboardPageState extends State<DashboardPage> {
 }
 
 class Note {
+  final dynamic id; // Use dynamic to accept both String and int
   final String judul;
-  final String created_at;
+
   final String isi;
 
   Note({
-    required this.created_at,
+    required this.id,
     required this.judul,
     required this.isi,
   });
+
   factory Note.fromJson(Map<String, dynamic> json) {
     return Note(
-      created_at: json['created_at'],
-      judul: json['judul'],
-      isi: json['isi'],
+      id: json['id'] as int, // Ubah ke tipe int
+      judul: json['judul'] as String,
+      isi: json['isi'] as String,
     );
   }
 }

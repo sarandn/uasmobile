@@ -50,37 +50,22 @@ class ApiManager {
     }
   }
 
-  Future<void> updateNoteDetail(
-    String id,
-    String judul,
-    String isi,
-  ) async {
+  Future<void> updateNote(String id, String judul, String isi) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/update_note/$id'),
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: {
+      Uri.parse('$baseUrl/notes/$id'), // Sesuaikan dengan endpoint API Anda
+      headers: {
+        'Content-Type': 'application/json', // Ganti menjadi application/json
+        'Authorization':
+            'Bearer ${await storage.read(key: 'auth_token')}', // Tambahkan token
+      },
+      body: jsonEncode({
         'judul': judul,
         'isi': isi,
-      },
+      }),
     );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to update NoteDetail');
-    }
-  }
-
-  Future<int?> deleteNoteDetail(int id) async {
-    final token = await storage.read(key: 'kode_rahassia');
-    final response = await http.delete(
-      Uri.parse('$baseUrl/NoteDetail'),
-      headers: {'Authorization': 'Bearer $token'},
-      body: jsonEncode({'id': id}),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to delete NoteDetail ${token}');
-    } else {
-      return response.statusCode;
     }
   }
 
@@ -122,58 +107,61 @@ class ApiManager {
   }
 
   Future<void> deleteNote(String id) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/delete_note/$id'),
-    );
+  final token = await storage.read(key: 'kode_rahassia');
+  final response = await http.delete(
+    Uri.parse('$baseUrl/notes/$id'),
+    headers: {'Authorization': 'Bearer $token'},
+  );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to delete note');
-    }
+  if (response.statusCode != 200) {
+    throw Exception('Failed to delete notes');
+  }
+}
 
-    Future<String?> login(String email, String password) async {
-      try {
-        final response = await http.post(
-          Uri.parse('$baseUrl/login.php'),
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: {
-            'email': email,
-            'password': password,
-          },
-        );
 
-        if (response.statusCode == 200) {
-          final jsonResponse = jsonDecode(response.body);
-          final token = jsonResponse['token'];
-
-          await storage.write(key: 'auth_token', value: token);
-
-          return token;
-        } else {
-          throw Exception('Failed to login');
-        }
-      } catch (e) {
-        print('Error in login: $e');
-        throw e;
-      }
-    }
-
-    Future<String?> authenticate(String email, String password) async {
+  Future<String?> login(String email, String password) async {
+    try {
       final response = await http.post(
-        Uri.parse('$baseUrl/login'),
-        body: {'email': email, 'password': password},
+        Uri.parse('$baseUrl/login.php'),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'email': email,
+          'password': password,
+        },
       );
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final token = jsonResponse['token'];
 
-        // Save the token securely
-        await storage.write(key: 'kode_rahassia', value: token);
+        await storage.write(key: 'auth_token', value: token);
 
         return token;
       } else {
-        throw Exception('Failed to authenticate');
+        throw Exception('Failed to login');
       }
+    } catch (e) {
+      print('Error in login: $e');
+      throw e;
+    }
+  }
+
+  Future<String?> authenticate(String email, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      body: {'email': email, 'password': password},
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      final token = jsonResponse['token'];
+
+      // Save the token securely
+      await storage.write(key: 'kode_rahassia', value: token);
+
+      return token;
+    } else {
+      throw Exception('Failed to authenticate');
     }
   }
 }

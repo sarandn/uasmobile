@@ -6,7 +6,6 @@ import 'package:uasnote/api_manager.dart';
 class NoteUpdateFormPage extends StatefulWidget {
   final Note note;
 
-
   NoteUpdateFormPage({required this.note});
 
   @override
@@ -55,14 +54,18 @@ class _NoteUpdateFormPageState extends State<NoteUpdateFormPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
+                print(
+                    'Button pressed'); // Cetak pesan untuk memastikan tombol ditekan
                 try {
                   final apiManager =
-                        Provider.of<ApiManager>(context, listen: false);
-                  await apiManager.updateNoteDetail(widget.note.isi, _judulController.text, _isiController.text);
-                  // Update note locally or reload notes from API, depending on your architecture
-                  Navigator.pop(context); // Kembali ke halaman sebelumnya setelah berhasil diupdate
+                      Provider.of<ApiManager>(context, listen: false);
+                  await apiManager.updateNote(
+                    widget.note.id.toString(),
+                    _judulController.text,
+                    _isiController.text,
+                  );
+                  Navigator.pop(context);
                 } catch (e) {
-                  // Handle error (show an error message, etc.)
                   print('Error updating note: $e');
                 }
               },

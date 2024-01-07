@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
             '/login': (context) => LoginScreen(),
             '/register': (context) => RegisterScreen(),
             '/dashboard': (context) => DashboardPage(),
+            '/update': (context) => DashboardPage(),
           },
         ));
   }

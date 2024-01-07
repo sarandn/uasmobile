@@ -21,11 +21,7 @@ class NoteDetailPage extends StatelessWidget {
               'Title: ${note.judul}',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
-            Text(
-              'Date: ${note.created_at}',
-              style: TextStyle(fontSize: 16),
-            ),
+            
             SizedBox(height: 10),
             Text(
               'Content: ${note.isi}',
