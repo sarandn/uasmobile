@@ -37,7 +37,46 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  
+  Future<void> _updateNote(Note note) async {
+  final apiManager = Provider.of<ApiManager>(context, listen: false);
+
+  // Implementasi logika update note di sini
+
+  try {
+    // Contoh pemanggilan updateNote
+    await apiManager.updateNote(
+      note.id.toString(),
+      'Judul Baru', // Ganti dengan judul baru
+      'Isi Baru', // Ganti dengan isi baru
+    );
+
+    // Reload notes after successful update
+    await _fetchNotes();
+  } catch (e) {
+    // Handle error (e.g., show an error message)
+    print('Error updating note: $e');
+
+    // Tambahkan logika penanganan kesalahan di sini, misalnya menampilkan AlertDialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text('Failed to update note. Error: $e'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 
   Future<void> _deleteNote(String id) async {
     final apiManager = Provider.of<ApiManager>(context, listen: false);

@@ -54,8 +54,7 @@ class _NoteUpdateFormPageState extends State<NoteUpdateFormPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                print(
-                    'Button pressed'); // Cetak pesan untuk memastikan tombol ditekan
+                print('Button pressed');
                 try {
                   final apiManager =
                       Provider.of<ApiManager>(context, listen: false);
@@ -64,6 +63,16 @@ class _NoteUpdateFormPageState extends State<NoteUpdateFormPage> {
                     _judulController.text,
                     _isiController.text,
                   );
+
+                  // Tampilkan notifikasi bahwa catatan berhasil diupdate
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Catatan berhasil diperbarui!'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+
+                  // Kembali ke halaman sebelumnya
                   Navigator.pop(context);
                 } catch (e) {
                   print('Error updating note: $e');

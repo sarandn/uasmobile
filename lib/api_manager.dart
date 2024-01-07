@@ -51,23 +51,24 @@ class ApiManager {
   }
 
   Future<void> updateNote(String id, String judul, String isi) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/notes/$id'), // Sesuaikan dengan endpoint API Anda
-      headers: {
-        'Content-Type': 'application/json', // Ganti menjadi application/json
-        'Authorization':
-            'Bearer ${await storage.read(key: 'auth_token')}', // Tambahkan token
-      },
-      body: jsonEncode({
-        'judul': judul,
-        'isi': isi,
-      }),
-    );
+  final token = await storage.read(key: 'kode_rahassia');
+  final response = await http.put(
+    Uri.parse('$baseUrl/notes/$id'), // Sesuaikan dengan endpoint API Anda
+    headers: {
+      'Content-Type': 'application/json', // Ganti menjadi application/json
+      'Authorization': 'Bearer $token', // Tambahkan token
+    },
+    body: jsonEncode({
+      'judul': judul,
+      'isi': isi,
+    }),
+  );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update NoteDetail');
-    }
+  if (response.statusCode != 200) {
+    throw Exception('Failed to update note');
   }
+}
+
 
   Future<String?> register(String name, String email, String password) async {
     final response = await http.post(
